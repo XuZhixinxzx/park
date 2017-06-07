@@ -300,19 +300,25 @@ int calcF(pos p){
 
 pos getLowedF(){
 	if (!openList.empty()){
-		auto posTemp = openList.front();
-		for (auto &p : openList)
-		if (parkmap[p.first*h + p.second].F < parkmap[posTemp.first*h + posTemp.second].F)
-			posTemp = p;
+		pos posTemp = openList.front();
+		for (list<pos>::iterator iter = openList.begin(); iter != openList.end();iter++)
+		if (parkmap[(*iter).first*h + (*iter).second].F < parkmap[posTemp.first*h + posTemp.second].F)
+			posTemp = (*iter);
+		//for (auto &p : openList)
+		//if (parkmap[p.first*h + p.second].F < parkmap[posTemp.first*h + posTemp.second].F)
+		//	posTemp = p;
 		return posTemp;
 	}
 	return pos(-1, -1);
 }
 
-bool isInList(const list<pos> list, const pos p){
-	for (auto pvar : list)
-	if (p == pvar)
+bool isInList(list<pos> List, pos p){
+	for (list<pos>::iterator iter = List.begin(); iter != List.end();iter++)
+	if (p == (*iter))
 		return true;
+	//for (auto pvar : List)
+	//if (p == pvar)
+	//	return true;
 	return false;
 
 }
@@ -355,7 +361,7 @@ bool findPath(pos pStart, pos pEnd){
 	openList.push_back(pStart);
 	cout << "findpath:(" << pStart.first << "," << pStart.second << ") (" << pEnd.first << "," << pEnd.second << ")" << endl;
 	while (!openList.empty()){
-		auto curPos = getLowedF();
+		pos curPos = getLowedF();
 		openList.remove(curPos);
 
 		//cout << "openList:  ";
@@ -373,26 +379,27 @@ bool findPath(pos pStart, pos pEnd){
 		//cout << endl;
 
 		//1,找到当前周围4个格中可以通过的格子(上下左右）
-		auto surroundPoses = getSurroundPoses(curPos, pEnd);
-		for (auto target : surroundPoses){
+		vector<pos> surroundPoses = getSurroundPoses(curPos, pEnd);
+		for (vector<pos>::iterator target = surroundPoses.begin(); target != surroundPoses.end(); target++){
+		//for (auto target : surroundPoses){
 			//cout << "target: " << target.first << " " << target.second << endl;
 			//2,对某一个格子，如果它不在开启列表中，加入到开启列表，设置当前格为其父节点，计算F G H  
-			if (!isInList(openList, target)){
-				parkmap[target.first*h + target.second].parent = curPos;
+			if (!isInList(openList, (*target))){
+				parkmap[(*target).first*h + (*target).second].parent = curPos;
 
-				parkmap[target.first*h + target.second].G = calcG(target);
-				parkmap[target.first*h + target.second].H = calcH(target);
-				parkmap[target.first*h + target.second].F = calcF(target);
+				parkmap[(*target).first*h + (*target).second].G = calcG(*target);
+				parkmap[(*target).first*h + (*target).second].H = calcH(*target);
+				parkmap[(*target).first*h + (*target).second].F = calcF(*target);
 
-				openList.push_back(target);
+				openList.push_back(*target);
 			}
 			//3，对某一个格子，它在开启列表中，计算G值, 如果比原来的大, 就什么都不做, 否则设置它的父节点为当前点,并更新G和F  
 			else{
-				int tempG = calcG(target);
-				if (tempG < parkmap[target.first*h + target.second].G){
-					parkmap[target.first*h + target.second].parent = curPos;
-					parkmap[target.first*h + target.second].G = tempG;
-					parkmap[target.first*h + target.second].F = calcF(target);
+				int tempG = calcG(*target);
+				if (tempG < parkmap[(*target).first*h + (*target).second].G){
+					parkmap[(*target).first*h + (*target).second].parent = curPos;
+					parkmap[(*target).first*h + (*target).second].G = tempG;
+					parkmap[(*target).first*h + (*target).second].F = calcF(*target);
 				}
 			}
 			bool isFound = isInList(openList, pEnd);
